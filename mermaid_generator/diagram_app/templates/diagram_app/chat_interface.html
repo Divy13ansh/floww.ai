@@ -1,0 +1,254 @@
+{% extends 'diagram_app/base.html' %}
+
+{% block title %}AI Mermaid Chat{% endblock %}
+
+{% block content %}
+<div class="row h-100">
+    <!-- Chat Panel -->
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">AI Mermaid Assistant</h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="startNewSession()">New Chat</button>
+            </div>
+            <div class="card-body d-flex flex-column" style="height: 70vh;">
+                <!-- Chat Messages -->
+                <div id="chatMessages" class="flex-grow-1 overflow-auto mb-3 p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                    {% for message in chat_history %}
+                    <div class="message mb-3 {{ message.message_type }}">
+                        <div class="d-flex align-items-start">
+                            {% if message.message_type == 'user' %}
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 14px;">
+                                U
+                            </div>
+                            {% else %}
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 14px;">
+                                AI
+                            </div>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                <div class="message-content">{{ message.content|linebreaks }}</div>
+                                <small class="text-muted">{{ message.timestamp|date:"H:i" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted">
+                        <p>👋 Hi! I'm your AI Mermaid assistant. I can help you create flowcharts through conversation.</p>
+                        <p>Try saying something like: "Create a flowchart for user registration process"</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Message Input -->
+                <div class="input-group">
+                    <input type="text" id="messageInput" class="form-control" placeholder="Describe your flowchart or ask questions..." onkeypress="handleKeyPress(event)">
+                    <button class="btn btn-primary" onclick="sendMessage()" id="sendBtn">
+                        <span id="sendText">Send</span>
+                        <span id="sendSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Diagram Preview Sidebar -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0">Diagram Preview</h6>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary" onclick="openFullscreenEditor()" id="fullscreenBtn" disabled>
+                        <i class="fas fa-expand"></i> Edit
+                    </button>
+
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div id="diagramPreview" class="mermaid-container h-100">
+                    <div class="text-center text-muted h-100 d-flex align-items-center justify-content-center">
+                        <div>
+                            <i class="fas fa-project-diagram fa-3x mb-3"></i>
+                            <p>Your diagram will appear here when generated</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mermaid Code Display -->
+                <div id="codeSection" class="mt-3 d-none">
+                    <h6>Generated Code:</h6>
+                    <pre id="mermaidCode" class="code-container" style="max-height: 200px; overflow-y: auto;"></pre>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="copyCode()">Copy Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const sessionId = '{{ session_id }}';
+let currentMermaidCode = '';
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+async function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value.trim();
+    
+    if (!message) return;
+    
+    const sendBtn = document.getElementById('sendBtn');
+    const sendText = document.getElementById('sendText');
+    const sendSpinner = document.getElementById('sendSpinner');
+    
+    // Show loading
+    sendBtn.disabled = true;
+    sendText.textContent = 'Sending...';
+    sendSpinner.classList.remove('d-none');
+    
+    // Add user message
+    addMessageToChat('user', message);
+    messageInput.value = '';
+    
+    try {
+        const response = await fetch('{% url "diagram_app:send_message" %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message, session_id: sessionId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            addMessageToChat('assistant', data.response);
+            
+            if (data.mermaid_code) {
+                updateDiagram(data.mermaid_code);
+            }
+        } else {
+            addMessageToChat('assistant', 'Error: ' + data.error);
+        }
+        
+    } catch (error) {
+        addMessageToChat('assistant', 'Network error. Please try again.');
+    } finally {
+        sendBtn.disabled = false;
+        sendText.textContent = 'Send';
+        sendSpinner.classList.add('d-none');
+    }
+}
+
+function addMessageToChat(type, content) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message mb-3 ${type}`;
+    
+    const avatarClass = type === 'user' ? 'bg-primary' : 'bg-success';
+    const avatarText = type === 'user' ? 'U' : 'AI';
+    
+    messageDiv.innerHTML = `
+        <div class="d-flex align-items-start">
+            <div class="${avatarClass} text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 14px;">
+                ${avatarText}
+            </div>
+            <div class="flex-grow-1">
+                <div class="message-content">${content.replace(/\n/g, '<br>')}</div>
+                <small class="text-muted">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+            </div>
+        </div>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+async function updateDiagram(mermaidCode) {
+    currentMermaidCode = mermaidCode;
+    const diagramPreview = document.getElementById('diagramPreview');
+    const codeSection = document.getElementById('codeSection');
+    const mermaidCodeElement = document.getElementById('mermaidCode');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    
+    try {
+        mermaidCodeElement.textContent = mermaidCode;
+        codeSection.classList.remove('d-none');
+        fullscreenBtn.disabled = false;
+        
+        diagramPreview.innerHTML = '';
+        const diagramId = 'diagram-' + Date.now();
+        const { svg } = await mermaid.render(diagramId, mermaidCode);
+        diagramPreview.innerHTML = svg;
+        
+    } catch (error) {
+        diagramPreview.innerHTML = `<div class="alert alert-warning">Error: ${error.message}</div>`;
+    }
+}
+
+function openFullscreenEditor() {
+    if (currentMermaidCode) {
+        // Simple: store code in localStorage and open editor
+        localStorage.setItem('mermaidCode', currentMermaidCode);
+        window.open('{% url "diagram_app:simple_editor" %}', '_blank');
+    }
+}
+
+function copyCode() {
+    const code = document.getElementById('mermaidCode').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        alert('Code copied!');
+    });
+}
+
+function startNewSession() {
+    window.location.reload();
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+});
+
+</script>
+
+<style>
+.message.user .message-content {
+    background-color: #e3f2fd;
+    padding: 10px;
+    border-radius: 10px;
+    border-top-left-radius: 3px;
+}
+
+.message.assistant .message-content {
+    background-color: #f1f8e9;
+    padding: 10px;
+    border-radius: 10px;
+    border-top-left-radius: 3px;
+}
+
+.mermaid-container {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #fafafa;
+    overflow: auto;
+}
+
+.code-container {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+}
+</style>
+{% endblock %}

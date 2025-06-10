@@ -1,0 +1,166 @@
+{% extends 'diagram_app/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Describe Your Flowchart</h5>
+            </div>
+            <div class="card-body">
+                <form id="diagramForm">
+                    <div class="mb-3">
+                        <label for="promptInput" class="form-label">Enter your flowchart description:</label>
+                        <textarea 
+                            class="form-control" 
+                            id="promptInput" 
+                            rows="6" 
+                            placeholder="Example: A user registration process where users enter email and password, system validates the data, creates account if valid, or shows error if invalid..."
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="generateBtn">
+                        <span id="btnText">Generate Diagram</span>
+                        <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                </form>
+                
+                <div id="errorAlert" class="alert alert-danger mt-3 d-none"></div>
+                
+                <div id="codeSection" class="mt-4 d-none">
+                    <h6>Generated Mermaid Code:</h6>
+                    <div id="mermaidCode" class="code-container"></div>
+                    <button class="btn btn-sm btn-outline-secondary mt-2" onclick="copyCode()">Copy Code</button>
+                </div>
+            </div>
+        </div>
+        
+        {% if recent_diagrams %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6>Recent Diagrams</h6>
+            </div>
+            <div class="card-body">
+                {% for diagram in recent_diagrams %}
+                <div class="mb-2">
+                    <small class="text-muted">{{ diagram.created_at|date:"M d, Y H:i" }}</small><br>
+                    <a href="{% url 'diagram_app:diagram_detail' diagram.id %}">
+                        {{ diagram.user_prompt|truncatechars:60 }}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Diagram Preview</h5>
+            </div>
+            <div class="card-body">
+                <div id="diagramPreview" class="mermaid-container">
+                    <div class="text-center text-muted">
+                        <i>Your generated diagram will appear here</i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('diagramForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const prompt = document.getElementById('promptInput').value.trim();
+    const generateBtn = document.getElementById('generateBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const errorAlert = document.getElementById('errorAlert');
+    const codeSection = document.getElementById('codeSection');
+    const mermaidCode = document.getElementById('mermaidCode');
+    const diagramPreview = document.getElementById('diagramPreview');
+    
+    if (!prompt) {
+        showError('Please enter a description for your flowchart.');
+        return;
+    }
+    
+    // Show loading state
+    generateBtn.disabled = true;
+    btnText.textContent = 'Generating...';
+    btnSpinner.classList.remove('d-none');
+    errorAlert.classList.add('d-none');
+    
+    try {
+        const response = await fetch('{% url "diagram_app:generate_diagram" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: prompt })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Display the generated code
+            mermaidCode.textContent = data.mermaid_code;
+            codeSection.classList.remove('d-none');
+            
+            // Render the diagram
+            await renderDiagram(data.mermaid_code);
+            
+        } else {
+            showError(data.error || 'Failed to generate diagram');
+        }
+        
+    } catch (error) {
+        showError('Network error: ' + error.message);
+    } finally {
+        // Reset button state
+        generateBtn.disabled = false;
+        btnText.textContent = 'Generate Diagram';
+        btnSpinner.classList.add('d-none');
+    }
+});
+
+async function renderDiagram(mermaidCode) {
+    const diagramPreview = document.getElementById('diagramPreview');
+    
+    try {
+        // Clear previous content
+        diagramPreview.innerHTML = '';
+        
+        // Create a unique ID for this diagram
+        const diagramId = 'diagram-' + Date.now();
+        
+        // Render the diagram
+        const { svg } = await mermaid.render(diagramId, mermaidCode);
+        diagramPreview.innerHTML = svg;
+        
+    } catch (error) {
+        diagramPreview.innerHTML = `
+            <div class="alert alert-warning">
+                <strong>Diagram Rendering Error:</strong><br>
+                ${error.message}
+            </div>
+        `;
+    }
+}
+
+function showError(message) {
+    const errorAlert = document.getElementById('errorAlert');
+    errorAlert.textContent = message;
+    errorAlert.classList.remove('d-none');
+}
+
+function copyCode() {
+    const code = document.getElementById('mermaidCode').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        alert('Code copied to clipboard!');
+    });
+}
+</script>
+{% endblock %}
