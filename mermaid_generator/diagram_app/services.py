@@ -20,6 +20,11 @@ class ContextAwareMermaidGenerator:
 
         DO NOT use ```
 
+        CRITICAL FORMATTING RULE:
+        When you generate Mermaid code, you MUST not use parantheses `()` in the code.
+        Instead, use square brackets `[]` for nodes and curly braces `{}` for decisions.
+        This is to ensure compatibility with the Mermaid renderer.
+        Your task is to help users create Mermaid diagrams based on their requirements, using the most appropriate diagram type (flowchart, sequence, timeline).
         
                 ## FLOWCHART SYNTAX AND CAPABILITIES
         
