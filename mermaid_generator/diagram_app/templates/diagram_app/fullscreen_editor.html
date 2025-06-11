@@ -1,131 +1,184 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Mermaid Editor</title>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { margin: 0; height: 100vh; }
-        .container-fluid { height: 100vh; }
-        .editor-panel { height: 100vh; }
-        textarea { height: 80vh; font-family: monospace; }
-        .preview-panel { height: 100vh; overflow: auto; background: #f8f9fa; }
-        .diagram-container { padding: 20px; }
-    </style>
-</head>
-<body>
-    <div class="container-fluid">
-        <div class="row h-100">
-            <!-- Code Editor -->
-            <div class="col-6 editor-panel">
-                <div class="p-3">
-                    <h5>Mermaid Code</h5>
-                    <div class="mb-2">
-                        <button class="btn btn-primary btn-sm" onclick="renderDiagram()">Render</button>
-                        <button class="btn btn-success btn-sm" onclick="downloadPNG()">Download PNG</button>
-                        <button class="btn btn-info btn-sm" onclick="downloadSVG()">Download SVG</button>
-                        <button class="btn btn-secondary btn-sm" onclick="copyCode()">Copy</button>
-                    </div>
-                    <textarea id="codeEditor" class="form-control" placeholder="Enter your Mermaid code here..."></textarea>
-                </div>
+{% extends 'diagram_app/base.html' %}
+
+{% block title %}Mermaid Code Editor{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+<style>
+    .editor-container {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        height: calc(100vh - 80px);
+    }
+    .editor-section, .preview-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .editor-header, .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .CodeMirror {
+        height: 100% !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+    }
+    .editor-controls {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .control-button {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        color: #fff;
+        cursor: pointer;
+    }
+    .control-button:hover {
+        background: rgba(79, 195, 247, 0.1);
+        border-color: #4fc3f7;
+    }
+    .preview-container {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1rem;
+        overflow: auto;
+    }
+    @media (max-width: 768px) {
+        .editor-container {
+            flex-direction: column;
+            height: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="editor-container">
+    <div class="editor-section">
+        <div class="editor-header">
+            <h3>Mermaid Code Editor</h3>
+            <div class="editor-controls">
+                <button class="control-button" onclick="renderDiagram()">Render</button>
+                <button class="control-button" onclick="downloadDiagram('png')">PNG</button>
+                <button class="control-button" onclick="downloadDiagram('svg')">SVG</button>
+                <button class="control-button" onclick="copyCode()">Copy</button>
+                <button class="control-button" onclick="saveDiagram()">Save</button>
             </div>
-            
-            <!-- Preview -->
-            <div class="col-6 preview-panel">
-                <div class="p-3">
-                    <h5>Preview</h5>
-                    <div class="diagram-container">
-                        <div id="diagramPreview"></div>
-                    </div>
-                </div>
+        </div>
+        <textarea id="codeEditor">[MERMAID_START]
+flowchart TD
+    A[Start] --> B[Process]
+    B --> C[End]
+[MERMAID_END]</textarea>
+    </div>
+    <div class="preview-section">
+        <div class="preview-header">
+            <h3>Live Preview</h3>
+        </div>
+        <div class="preview-container" id="previewContainer">
+            <div class="preview-empty">
+                <i class="fas fa-diagram-project"></i>
+                <p>Start typing Mermaid code to see the magic happen!</p>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script>
-        // Load code from localStorage if available
-        const savedCode = localStorage.getItem('mermaidCode');
-        if (savedCode) {
-            document.getElementById('codeEditor').value = savedCode;
-            localStorage.removeItem('mermaidCode'); // Clean up
-            renderDiagram();
-        } else {
-            // Default code
-            document.getElementById('codeEditor').value = `flowchart TD
-    A[Start] --> B{Decision}
-    B -->|Yes| C[Process]
-    B -->|No| D[End]
-    C --> D`;
-            renderDiagram();
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"></script>
+<script>
+const editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+    mode: 'javascript',
+    theme: 'monokai',
+    lineNumbers: true,
+    autoCloseBrackets: true
+});
+editor.setSize('100%', '100%');
+
+async function renderDiagram() {
+    const code = editor.getValue();
+    const previewContainer = document.getElementById('previewContainer');
+    previewContainer.innerHTML = '';
+    try {
+        const diagramId = `diagram-${Date.now()}`;
+        const { svg } = await mermaid.render(diagramId, code);
+        previewContainer.innerHTML = svg;
+        const svgElement = previewContainer.querySelector('svg');
+        if (svgElement) {
+            svgElement.style.maxWidth = '100%';
+            svgElement.style.height = 'auto';
         }
+    } catch (error) {
+        previewContainer.innerHTML = `<div class="text-danger">Rendering error: ${error.message}</div>`;
+    }
+}
 
-        mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
-
-        async function renderDiagram() {
-            const code = document.getElementById('codeEditor').value;
-            const preview = document.getElementById('diagramPreview');
-            
-            if (!code.trim()) {
-                preview.innerHTML = '<p class="text-muted">Enter code to see preview</p>';
-                return;
-            }
-            
-            try {
-                preview.innerHTML = '';
-                const diagramId = 'diagram-' + Date.now();
-                const { svg } = await mermaid.render(diagramId, code);
-                preview.innerHTML = svg;
-            } catch (error) {
-                preview.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
-            }
-        }
-
-        async function downloadPNG() {
-            const diagramElement = document.getElementById('diagramPreview');
-            try {
-                const canvas = await html2canvas(diagramElement, { backgroundColor: '#ffffff' });
-                const link = document.createElement('a');
-                link.download = 'diagram.png';
-                link.href = canvas.toDataURL();
-                link.click();
-            } catch (error) {
-                alert('Error generating PNG: ' + error.message);
-            }
-        }
-
-        function downloadSVG() {
-            const svg = document.querySelector('#diagramPreview svg');
-            if (!svg) {
-                alert('No diagram to download');
-                return;
-            }
-            
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const blob = new Blob([svgData], {type: 'image/svg+xml'});
-            const url = URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.download = 'diagram.svg';
-            link.href = url;
-            link.click();
-            
-            URL.revokeObjectURL(url);
-        }
-
-        function copyCode() {
-            const code = document.getElementById('codeEditor').value;
-            navigator.clipboard.writeText(code).then(() => {
-                alert('Code copied to clipboard!');
-            });
-        }
-
-        // Auto-render on typing (with delay)
-        let timeout;
-        document.getElementById('codeEditor').addEventListener('input', function() {
-            clearTimeout(timeout);
-            timeout = setTimeout(renderDiagram, 1000);
+async function downloadDiagram(format) {
+    const code = editor.getValue();
+    try {
+        const response = await fetch('{% url "diagram_app:export_diagram" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ mermaid_code: code, format })
         });
-    </script>
-</body>
-</html>
+        if (!response.ok) throw new Error('Failed to export diagram');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `diagram.${format}`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        alert(`Export error: ${error.message}`);
+    }
+}
+
+async function copyCode() {
+    try {
+        await navigator.clipboard.writeText(editor.getValue());
+        alert('Code copied to clipboard!');
+    } catch (error) {
+        alert('Failed to copy code');
+    }
+}
+
+async function saveDiagram() {
+    const code = editor.getValue();
+    try {
+        const response = await fetch('{% url "diagram_app:save_diagram_edit" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ mermaid_code: code, title: 'Edited Diagram' })
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert(data.message);
+        } else {
+            alert(`Save error: ${data.error}`);
+        }
+    } catch (error) {
+        alert(`Save error: ${error.message}`);
+    }
+}
+
+// Initial Render
+renderDiagram();
+editor.on('change', renderDiagram);
+{% endblock %}

@@ -1,166 +1,199 @@
 {% extends 'diagram_app/base.html' %}
 
+{% block title %}AI Mermaid Generator - Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    .home-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    .input-section, .preview-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .hero-section {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: #888;
+    }
+    .main-card {
+        background: rgba(20, 20, 20, 0.8);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #e1e5e9;
+    }
+    .form-textarea {
+        background: rgba(50, 50, 50, 0.8);
+        border: 1px solid #555;
+        border-radius: 8px;
+        padding: 1rem;
+        color: #e1e5e9;
+        width: 100%;
+        min-height: 120px;
+        resize: vertical;
+    }
+    .form-textarea:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .generate-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 1rem;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+    }
+    .generate-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+    }
+    .generate-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .code-section {
+        background: rgba(30, 30, 30, 0.8);
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    .code-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .copy-btn {
+        background: transparent;
+        border: 1px solid #555;
+        border-radius: 6px;
+        padding: 0.5rem;
+        color: #888;
+        cursor: pointer;
+    }
+    .copy-btn:hover {
+        border-color: #667eea;
+        color: #667eea;
+    }
+    .preview-container {
+        background: rgba(40, 40, 40, 0.6);
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 300px;
+        overflow: auto;
+    }
+    .quick-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    .action-card {
+        flex: 1;
+        background: rgba(30, 30, 30, 0.8);
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        text-decoration: none;
+        color: #e1e5e9;
+    }
+    .action-card:hover {
+        border-color: #667eea;
+    }
+    .action-icon {
+        font-size: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    @media (max-width: 1200px) {
+        .home-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (max-width: 768px) {
+        .quick-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5>Describe Your Flowchart</h5>
-            </div>
-            <div class="card-body">
-                <form id="diagramForm">
-                    <div class="mb-3">
-                        <label for="promptInput" class="form-label">Enter your flowchart description:</label>
-                        <textarea 
-                            class="form-control" 
-                            id="promptInput" 
-                            rows="6" 
-                            placeholder="Example: A user registration process where users enter email and password, system validates the data, creates account if valid, or shows error if invalid..."
-                            required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" id="generateBtn">
-                        <span id="btnText">Generate Diagram</span>
-                        <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
-                    </button>
-                </form>
-                
-                <div id="errorAlert" class="alert alert-danger mt-3 d-none"></div>
-                
-                <div id="codeSection" class="mt-4 d-none">
-                    <h6>Generated Mermaid Code:</h6>
-                    <div id="mermaidCode" class="code-container"></div>
-                    <button class="btn btn-sm btn-outline-secondary mt-2" onclick="copyCode()">Copy Code</button>
-                </div>
-            </div>
+<div class="home-container">
+    <div class="input-section">
+        <div class="hero-section">
+            <h1 class="hero-title">Create Beautiful Flowcharts</h1>
+            <p class="hero-subtitle">Use our AI chat interface to generate professional diagrams</p>
         </div>
-        
-        {% if recent_diagrams %}
-        <div class="card mt-4">
-            <div class="card-header">
-                <h6>Recent Diagrams</h6>
-            </div>
-            <div class="card-body">
-                {% for diagram in recent_diagrams %}
-                <div class="mb-2">
-                    <small class="text-muted">{{ diagram.created_at|date:"M d, Y H:i" }}</small><br>
-                    <a href="{% url 'diagram_app:diagram_detail' diagram.id %}">
-                        {{ diagram.user_prompt|truncatechars:60 }}
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
+        <div class="main-card">
+            <h2>Start Creating</h2>
+            <p>Visit the chat interface to describe your flowchart and generate diagrams instantly.</p>
+            <a href="{% url 'diagram_app:chat_interface' %}" class="generate-btn">
+                <i class="fas fa-magic"></i> Go to Chat
+            </a>
         </div>
-        {% endif %}
+        <div class="quick-actions">
+            <a href="{% url 'diagram_app:chat_interface' %}" class="action-card">
+                <div class="action-icon"><i class="fas fa-comments"></i></div>
+                <div class="action-title">AI Chat</div>
+                <div class="action-desc">Interactive chat interface</div>
+            </a>
+            <a href="{% url 'diagram_app:simple_editor' %}" class="action-card">
+                <div class="action-icon"><i class="fas fa-code"></i></div>
+                <div class="action-title">Code Editor</div>
+                <div class="action-desc">Edit mermaid code directly</div>
+            </a>
+        </div>
     </div>
-    
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5>Diagram Preview</h5>
-            </div>
-            <div class="card-body">
-                <div id="diagramPreview" class="mermaid-container">
-                    <div class="text-center text-muted">
-                        <i>Your generated diagram will appear here</i>
-                    </div>
+    <div class="preview-section">
+        <div class="main-card">
+            <h2>Diagram Preview</h2>
+            <div class="preview-container">
+                <div class="preview-empty">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>Your diagram will appear here</h3>
+                    <p>Start chatting to see the magic!</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-document.getElementById('diagramForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const prompt = document.getElementById('promptInput').value.trim();
-    const generateBtn = document.getElementById('generateBtn');
-    const btnText = document.getElementById('btnText');
-    const btnSpinner = document.getElementById('btnSpinner');
-    const errorAlert = document.getElementById('errorAlert');
-    const codeSection = document.getElementById('codeSection');
-    const mermaidCode = document.getElementById('mermaidCode');
-    const diagramPreview = document.getElementById('diagramPreview');
-    
-    if (!prompt) {
-        showError('Please enter a description for your flowchart.');
-        return;
-    }
-    
-    // Show loading state
-    generateBtn.disabled = true;
-    btnText.textContent = 'Generating...';
-    btnSpinner.classList.remove('d-none');
-    errorAlert.classList.add('d-none');
-    
-    try {
-        const response = await fetch('{% url "diagram_app:generate_diagram" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ prompt: prompt })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // Display the generated code
-            mermaidCode.textContent = data.mermaid_code;
-            codeSection.classList.remove('d-none');
-            
-            // Render the diagram
-            await renderDiagram(data.mermaid_code);
-            
-        } else {
-            showError(data.error || 'Failed to generate diagram');
-        }
-        
-    } catch (error) {
-        showError('Network error: ' + error.message);
-    } finally {
-        // Reset button state
-        generateBtn.disabled = false;
-        btnText.textContent = 'Generate Diagram';
-        btnSpinner.classList.add('d-none');
-    }
-});
-
-async function renderDiagram(mermaidCode) {
-    const diagramPreview = document.getElementById('diagramPreview');
-    
-    try {
-        // Clear previous content
-        diagramPreview.innerHTML = '';
-        
-        // Create a unique ID for this diagram
-        const diagramId = 'diagram-' + Date.now();
-        
-        // Render the diagram
-        const { svg } = await mermaid.render(diagramId, mermaidCode);
-        diagramPreview.innerHTML = svg;
-        
-    } catch (error) {
-        diagramPreview.innerHTML = `
-            <div class="alert alert-warning">
-                <strong>Diagram Rendering Error:</strong><br>
-                ${error.message}
-            </div>
-        `;
-    }
-}
-
-function showError(message) {
-    const errorAlert = document.getElementById('errorAlert');
-    errorAlert.textContent = message;
-    errorAlert.classList.remove('d-none');
-}
-
-function copyCode() {
-    const code = document.getElementById('mermaidCode').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-        alert('Code copied to clipboard!');
-    });
-}
-</script>
 {% endblock %}

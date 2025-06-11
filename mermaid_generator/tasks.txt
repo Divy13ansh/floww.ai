@@ -1,0 +1,12 @@
+1. export feature not working
+2. remove the mermaid code div from the chat interface
+3. zoom feature on full screen mode
+4. fix the background animation
+5. keep the chat history and a sidebar for the user to access it
+6. voice to text api for input
+
+
+BIG TASKS
+1. train the LLM
+2. fix the chat history
+ 

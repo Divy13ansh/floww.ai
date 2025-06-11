@@ -6,6 +6,7 @@ app_name = 'diagram_app'
 urlpatterns = [
     path('', views.chat_interface, name='chat_interface'),
     path('send-message/', views.send_message, name='send_message'),
+    path('export-diagram/', views.export_diagram, name='export_diagram'),
     path('chat-history/<str:session_id>/', views.get_chat_history, name='chat_history'),
     path('new-session/', views.new_session, name='new_session'),
     path('simple-editor/', views.simple_editor, name='simple_editor'),

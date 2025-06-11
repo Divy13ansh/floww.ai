@@ -8,6 +8,7 @@ from .services import mermaid_generator
 from .models import ChatSession, ChatMessage, DiagramHistory
 from io import BytesIO
 import base64
+import subprocess
 
 def chat_interface(request):
     """Main chat interface with sidebar preview"""
@@ -103,7 +104,29 @@ def simple_editor(request):
     """Simple fullscreen editor"""
     return render(request, 'diagram_app/fullscreen_editor.html')
 
-
+@require_http_methods(["POST"])
+def export_diagram(request):
+    try:
+        data = json.loads(request.body)
+        mermaid_code = data.get('mermaid_code')
+        format = data.get('format', 'svg')
+        if format not in ['svg', 'png']:
+            return JsonResponse({'error': 'Unsupported format'}, status=400)
+        process = subprocess.run(
+            ['mmdc', '-i', '-', '-o', '-', f'--{format}'],
+            input=mermaid_code.encode(),
+            capture_output=True
+        )
+        if process.returncode != 0:
+            return JsonResponse({'error': 'Failed to generate diagram'}, status=500)
+        content_type = 'image/svg+xml' if format == 'svg' else 'image/png'
+        response = HttpResponse(content=process.stdout, content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename=diagram.{format}'
+        return response
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @csrf_exempt
 @require_http_methods(["POST"])
