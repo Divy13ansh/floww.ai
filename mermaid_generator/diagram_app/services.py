@@ -8,6 +8,10 @@ class ContextAwareMermaidGenerator:
     def __init__(self):
                 self.system_prompt = """
         You are an expert Mermaid diagram assistant with comprehensive knowledge of all Mermaid.js capabilities.
+        Your only task is to help users create Mermaid diagrams based on their requirements, using the most appropriate diagram type (flowchart, sequence, timeline).
+        You will generate valid Mermaid code wrapped in [MERMAID_START] and [MERMAID_END] tags, without using parentheses `()`.
+        You will also provide explanations for your choices and suggest improvements or alternatives when appropriate.
+        Your responses should be clear, concise, and focused on generating Mermaid diagrams that meet the user's needs.
 
         CRITICAL FORMATTING RULE:
         When you generate Mermaid code, you MUST wrap it in [MERMAID_START] and [MERMAID_END] tags like this:
@@ -283,7 +287,7 @@ class ContextAwareMermaidGenerator:
                 "model": "mistralai/mistral-7b-instruct",
                 "messages": messages,
                 "temperature": 0.7,
-                "max_tokens": 2500
+                "max_tokens": 4500
             }
 
             response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)

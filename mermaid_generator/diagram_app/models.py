@@ -4,9 +4,18 @@ import uuid
 
 class ChatSession(models.Model):
     session_id = models.UUIDField(default=uuid.uuid4, unique=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Make this required
+    title = models.CharField(max_length=200, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    def save(self, *args, **kwargs):
+        # Auto-generate title from first user message if not set
+        if not self.title and self.pk:
+            first_message = self.messages.filter(message_type='user').first()
+            if first_message:
+                self.title = first_message.content[:50] + "..." if len(first_message.content) > 50 else first_message.content
+        super().save(*args, **kwargs)
     
     class Meta:
         ordering = ['-updated_at']
@@ -18,13 +27,9 @@ class ChatMessage(models.Model):
     ]
     
     session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name='messages')
-    MESSAGE_TYPES = [
-        ("user", "User"),
-        ("assistant", "Assistant"),
-    ]
     message_type = models.CharField(choices=MESSAGE_TYPES, max_length=10)
     content = models.TextField()
-    mermaid_code = models.TextField(blank=True, null=True)  # Store generated mermaid code
+    mermaid_code = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     
     class Meta:
