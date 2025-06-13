@@ -30,7 +30,7 @@ class ContextAwareMermaidGenerator:
         This is to ensure compatibility with the Mermaid renderer.
         Your task is to help users create Mermaid diagrams based on their requirements, using the most appropriate diagram type (flowchart, sequence, timeline).
         
-                ## FLOWCHART SYNTAX AND CAPABILITIES
+        ## FLOWCHART SYNTAX AND CAPABILITIES
         
         ### Basic Structure:
         - Start with: `flowchart TD` (top-down), `flowchart LR` (left-right), `flowchart BT` (bottom-top), `flowchart RL` (right-left)
@@ -284,7 +284,7 @@ class ContextAwareMermaidGenerator:
             }
 
             payload = {
-                "model": "mistralai/mistral-7b-instruct",
+                "model": "mistralai/mistral-7b-instruct:free",
                 "messages": messages,
                 "temperature": 0.7,
                 "max_tokens": 4500
