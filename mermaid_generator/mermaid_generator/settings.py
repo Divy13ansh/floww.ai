@@ -92,7 +92,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 STATIC_URL = 'static/'
-<<<<<<< HEAD
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
@@ -101,8 +100,6 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
-=======
->>>>>>> 51b93bcb9b23d2529911f607383e507eb1bcf42b
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
