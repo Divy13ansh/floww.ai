@@ -10,7 +10,8 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     
     # Main chat interface
-    path('', views.chat_interface, name='chat_interface'),
+    path('chat_interface/', views.chat_interface, name='chat_interface'),
+    path('', views.home_view, name='home'),
     path('chat/<uuid:session_id>/', views.chat_interface, name='chat_interface_with_session'),
     
     # Session management

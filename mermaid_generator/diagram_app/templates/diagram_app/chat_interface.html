@@ -5,11 +5,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Mermaid Chat</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='52' font-size='52'>🤖</text></svg>">
+
+    <title>AI Flowchart Chat</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     {% block extra_css %}
-
 
     <style>
         * {
@@ -20,9 +22,25 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0f1a;
+            background: linear-gradient(135deg, #1a0d2e 0%, #2d1b4e 25%, #4a2c6b 50%, #6b3d8a 75%, #8e4ec6 100%);
             color: #fff;
             overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(138, 78, 198, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(107, 61, 138, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(45, 27, 78, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
         }
 
         .app-container {
@@ -32,37 +50,43 @@
 
         /* Sidebar Styles */
         .sidebar {
-            width: 280px;
-            background: rgba(20, 25, 35, 0.95);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            width: 300px;
+            background: rgba(26, 13, 46, 0.9);
+            border-right: 1px solid rgba(168, 85, 247, 0.2);
             display: flex;
             flex-direction: column;
             transition: transform 0.3s ease;
+            backdrop-filter: blur(20px);
         }
 
         .sidebar-header {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
         }
 
         .new-chat-btn {
             width: 100%;
-            background: rgba(79, 195, 247, 0.1);
-            border: 1px solid rgba(79, 195, 247, 0.3);
-            border-radius: 8px;
-            padding: 0.75rem;
+            background: linear-gradient(135deg, #a855f7 0%, #c084fc 50%, #e879f9 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
             color: #fff;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .new-chat-btn:hover {
-            background: rgba(79, 195, 247, 0.2);
-            border-color: #4fc3f7;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(168, 85, 247, 0.4);
             color: #fff;
             text-decoration: none;
         }
@@ -74,23 +98,23 @@
         }
 
         .sidebar-section {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .section-title {
-            padding: 0 1rem;
-            font-size: 0.75rem;
-            font-weight: 600;
+            padding: 0 1.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
             color: rgba(255, 255, 255, 0.6);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
         }
 
         .chat-item {
             display: flex;
             align-items: center;
-            padding: 0.75rem 1rem;
+            padding: 1rem 1.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
             border-left: 3px solid transparent;
@@ -98,24 +122,24 @@
         }
 
         .chat-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(168, 85, 247, 0.1);
         }
 
         .chat-item.active {
-            background: rgba(79, 195, 247, 0.1);
-            border-left-color: #4fc3f7;
+            background: rgba(168, 85, 247, 0.15);
+            border-left-color: #a855f7;
         }
 
         .chat-item-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 0.75rem;
-            font-size: 0.875rem;
+            margin-right: 1rem;
+            font-size: 0.9rem;
         }
 
         .chat-item-content {
@@ -124,8 +148,8 @@
         }
 
         .chat-item-title {
-            font-size: 0.875rem;
-            font-weight: 500;
+            font-size: 0.9rem;
+            font-weight: 600;
             color: #fff;
             white-space: nowrap;
             overflow: hidden;
@@ -152,14 +176,14 @@
             border: none;
             color: rgba(255, 255, 255, 0.5);
             cursor: pointer;
-            padding: 0.25rem;
-            border-radius: 4px;
+            padding: 0.5rem;
+            border-radius: 6px;
             transition: all 0.3s ease;
         }
 
         .delete-btn:hover {
-            color: #ff4444;
-            background: rgba(255, 68, 68, 0.1);
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
         }
 
         /* Main Content */
@@ -171,32 +195,39 @@
         }
 
         .chat-header {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: rgba(26, 13, 46, 0.6);
+            backdrop-filter: blur(20px);
         }
 
         .chat-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a855f7 0%, #c084fc 50%, #e879f9 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         .sidebar-toggle {
             display: none;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 6px;
-            padding: 0.5rem;
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
             color: #fff;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            background: rgba(168, 85, 247, 0.3);
         }
 
         /* Chat Messages Area */
@@ -209,20 +240,20 @@
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 1rem;
+            padding: 2rem;
         }
 
         /* Message Styles */
         .message {
             display: flex;
             gap: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             max-width: 100%;
         }
 
         .message-avatar {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -232,19 +263,20 @@
         }
 
         .message.user .message-avatar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
         }
 
         .message.assistant .message-avatar {
-            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            background: linear-gradient(135deg, #c084fc 0%, #e879f9 100%);
         }
 
         .message-content {
-            padding: 1rem;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
             max-width: 80%;
             word-wrap: break-word;
+            position: relative;
         }
 
         .message.user {
@@ -252,23 +284,24 @@
         }
 
         .message.user .message-content {
-            background: rgba(102, 126, 234, 0.1);
-            border-color: rgba(102, 126, 234, 0.3);
+            background: rgba(168, 85, 247, 0.15);
+            border-color: rgba(168, 85, 247, 0.3);
         }
 
         .message.assistant .message-content {
-            background: rgba(79, 195, 247, 0.05);
-            border-color: rgba(79, 195, 247, 0.2);
+            background: rgba(192, 132, 252, 0.1);
+            border-color: rgba(192, 132, 252, 0.2);
         }
 
         /* Mermaid Diagram Styles */
         .mermaid-container {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
             overflow-x: auto;
+            position: relative;
         }
 
         .mermaid {
@@ -277,30 +310,35 @@
 
         /* Chat Input */
         .chat-input-container {
-            padding: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-top: 1px solid rgba(168, 85, 247, 0.2);
             display: flex;
-            gap: 0.5rem;
+            gap: 1rem;
             align-items: end;
+            background: rgba(26, 13, 46, 0.6);
+            backdrop-filter: blur(20px);
         }
 
         .chat-input {
             flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
             color: #fff;
             resize: none;
-            min-height: 40px;
+            min-height: 50px;
             max-height: 120px;
             font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
         .chat-input:focus {
             outline: none;
-            border-color: #4fc3f7;
-            background: rgba(255, 255, 255, 0.08);
+            border-color: #a855f7;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
         }
 
         .chat-input::placeholder {
@@ -308,22 +346,23 @@
         }
 
         .send-button {
-            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            background: linear-gradient(135deg, #a855f7 0%, #c084fc 50%, #e879f9 100%);
             border: none;
-            border-radius: 8px;
-            width: 40px;
-            height: 40px;
+            border-radius: 12px;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
             color: white;
+            font-size: 1.1rem;
         }
 
         .send-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(79, 195, 247, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
         }
 
         .send-button:disabled {
@@ -337,7 +376,7 @@
         .loading {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             color: rgba(255, 255, 255, 0.7);
         }
 
@@ -347,10 +386,10 @@
         }
 
         .loading-dot {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: #4fc3f7;
+            background: #a855f7;
             animation: loadingDot 1.4s infinite ease-in-out;
         }
 
@@ -378,7 +417,7 @@
         /* Welcome Screen */
         .welcome-screen {
             text-align: center;
-            padding: 2rem;
+            padding: 4rem 2rem;
             color: rgba(255, 255, 255, 0.7);
             display: flex;
             flex-direction: column;
@@ -388,24 +427,25 @@
         }
 
         .welcome-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            color: #4fc3f7;
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #a855f7 0%, #c084fc 50%, #e879f9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .welcome-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
             color: #fff;
         }
 
         .welcome-subtitle {
-            font-size: 1rem;
+            font-size: 1.1rem;
             opacity: 0.8;
+            line-height: 1.6;
         }
-
-        /* Add these styles after the existing CSS */
 
         /* Fullscreen Modal */
         .fullscreen-modal {
@@ -417,7 +457,7 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.95);
             z-index: 10000;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
         }
 
         .fullscreen-modal.active {
@@ -429,52 +469,53 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
-            background: rgba(20, 25, 35, 0.9);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem 2rem;
+            background: rgba(26, 13, 46, 0.9);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
         }
 
         .fullscreen-title {
-            color: #4fc3f7;
-            font-size: 1.25rem;
-            font-weight: 600;
+            color: #a855f7;
+            font-size: 1.3rem;
+            font-weight: 700;
         }
 
         .fullscreen-controls {
             display: flex;
-            gap: 0.5rem;
+            gap: 1rem;
             align-items: center;
         }
 
         .fullscreen-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            padding: 0.5rem 1rem;
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
             color: #fff;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 0.875rem;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
 
         .fullscreen-btn:hover {
-            background: rgba(79, 195, 247, 0.2);
-            border-color: #4fc3f7;
+            background: rgba(168, 85, 247, 0.3);
+            border-color: #a855f7;
         }
 
         .zoom-controls {
             display: flex;
-            gap: 0.25rem;
+            gap: 0.5rem;
             align-items: center;
             margin-right: 1rem;
         }
 
         .zoom-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            width: 32px;
-            height: 32px;
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
             color: #fff;
             cursor: pointer;
             display: flex;
@@ -484,15 +525,16 @@
         }
 
         .zoom-btn:hover {
-            background: rgba(79, 195, 247, 0.2);
-            border-color: #4fc3f7;
+            background: rgba(168, 85, 247, 0.3);
+            border-color: #a855f7;
         }
 
         .zoom-level {
             color: #fff;
-            font-size: 0.875rem;
-            min-width: 50px;
+            font-size: 0.9rem;
+            min-width: 60px;
             text-align: center;
+            font-weight: 600;
         }
 
         .fullscreen-content {
@@ -525,29 +567,28 @@
 
         /* Close button */
         .close-fullscreen {
-            background: rgba(255, 68, 68, 0.2);
-            border: 1px solid rgba(255, 68, 68, 0.3);
-            color: #ff6b6b;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
         }
 
         .close-fullscreen:hover {
-            background: rgba(255, 68, 68, 0.3);
-            border-color: #ff6b6b;
+            background: rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
         }
 
-        /* Add this to your existing CSS */
         .header-controls {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
             align-items: center;
         }
 
         .header-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            width: 36px;
-            height: 36px;
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -557,8 +598,8 @@
         }
 
         .header-btn:hover {
-            background: rgba(79, 195, 247, 0.2);
-            border-color: #4fc3f7;
+            background: rgba(168, 85, 247, 0.3);
+            border-color: #a855f7;
             transform: translateY(-1px);
         }
 
@@ -566,21 +607,13 @@
             transform: translateY(0);
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .header-controls {
-                display: none;
-                /* Hide on mobile to save space */
-            }
-        }
-
         /* Mermaid diagram action buttons */
         .diagram-actions {
             position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
+            top: 0.75rem;
+            right: 0.75rem;
             display: flex;
-            gap: 0.25rem;
+            gap: 0.5rem;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -590,19 +623,20 @@
         }
 
         .diagram-action-btn {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 6px;
             color: #fff;
-            padding: 0.25rem 0.5rem;
+            padding: 0.5rem 0.75rem;
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .diagram-action-btn:hover {
-            background: rgba(79, 195, 247, 0.3);
-            border-color: #4fc3f7;
+            background: rgba(168, 85, 247, 0.3);
+            border-color: #a855f7;
         }
 
         /* Responsive Design */
@@ -614,6 +648,7 @@
                 height: 100vh;
                 z-index: 1000;
                 transform: translateX(-100%);
+                width: 280px;
             }
 
             .sidebar.open {
@@ -631,6 +666,10 @@
             .message-content {
                 max-width: 90%;
             }
+
+            .header-controls {
+                display: none;
+            }
         }
 
         /* Scrollbar Styles */
@@ -646,24 +685,25 @@
 
         .sidebar-content::-webkit-scrollbar-thumb,
         .chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(79, 195, 247, 0.3);
+            background: rgba(168, 85, 247, 0.4);
             border-radius: 3px;
         }
 
         .sidebar-content::-webkit-scrollbar-thumb:hover,
         .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(79, 195, 247, 0.5);
+            background: rgba(168, 85, 247, 0.6);
         }
 
         /* Error Message */
         .error-message {
-            background: rgba(255, 68, 68, 0.1);
-            border: 1px solid rgba(255, 68, 68, 0.3);
-            color: #ff6b6b;
-            padding: 0.75rem;
-            border-radius: 8px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 12px;
             margin: 1rem;
             text-align: center;
+            font-weight: 600;
         }
     </style>
     {% endblock %}
@@ -677,7 +717,7 @@
             <div class="sidebar-header">
                 <a href="{% url 'diagram_app:new_session_view' %}" class="new-chat-btn">
                     <i class="fas fa-plus"></i>
-                    New chat
+                    New Chat
                 </a>
             </div>
 
@@ -720,7 +760,7 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="chat-title">
-                    <i class="fas fa-magic"></i>
+                    <i class="fas fa-project-diagram"></i>
                     floww.ai
                 </div>
                 <div class="header-controls">
@@ -764,11 +804,11 @@
                     {% empty %}
                     <div class="welcome-screen">
                         <div class="welcome-icon">
-                            <i class="fas fa-magic"></i>
+                            <i class="fas fa-project-diagram"></i>
                         </div>
-                        <h3 class="welcome-title">Welcome to AI Mermaid Assistant!</h3>
-                        <p class="welcome-subtitle">Start a conversation to create beautiful diagrams and flowcharts.
-                        </p>
+                        <h3 class="welcome-title">Welcome to AI Flowchart Generator!</h3>
+                        <p class="welcome-subtitle">Start a conversation to create beautiful diagrams and flowcharts
+                            instantly with the power of AI.</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -782,13 +822,13 @@
                 </button>
             </div>
         </div>
-        <!-- Add this right before the closing </div> of app-container -->
+
         <!-- Fullscreen Modal -->
         <div class="fullscreen-modal" id="fullscreenModal">
             <div class="fullscreen-header">
                 <div class="fullscreen-title">
                     <i class="fas fa-expand-arrows-alt"></i>
-                    Fullscreen Diagram View
+                    Fullscreen View
                 </div>
                 <div class="fullscreen-controls">
                     <div class="zoom-controls">
@@ -829,17 +869,18 @@
         let isDragging = false;
         let dragStart = { x: 0, y: 0 };
         let currentTranslate = { x: 0, y: 0 };
+
         // Initialize Mermaid
         mermaid.initialize({
             startOnLoad: true,
             theme: 'dark',
             themeVariables: {
-                primaryColor: '#4fc3f7',
+                primaryColor: '#a855f7',
                 primaryTextColor: '#fff',
-                primaryBorderColor: '#29b6f6',
-                lineColor: '#4fc3f7',
-                secondaryColor: '#29b6f6',
-                tertiaryColor: '#0a0f1a'
+                primaryBorderColor: '#c084fc',
+                lineColor: '#a855f7',
+                secondaryColor: '#c084fc',
+                tertiaryColor: '#1a0d2e'
             }
         });
 
@@ -886,7 +927,6 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // If deleting current session, redirect to home
                             if (sessionId === currentSessionId) {
                                 window.location.href = '{% url "diagram_app:chat_interface" %}';
                             } else {
@@ -909,19 +949,14 @@
             const fullscreenModal = document.getElementById('fullscreenModal');
             const fullscreenContainer = document.getElementById('fullscreenDiagramContainer');
 
-            // Clone the mermaid diagram
             const clonedDiagram = mermaidElement.cloneNode(true);
             fullscreenContainer.innerHTML = '';
             fullscreenContainer.appendChild(clonedDiagram);
 
-            // Show fullscreen modal
             fullscreenModal.classList.add('active');
             document.body.style.overflow = 'hidden';
 
-            // Reset zoom and position
             resetZoom();
-
-            // Add drag functionality
             addDragFunctionality();
         }
 
@@ -930,7 +965,6 @@
             fullscreenModal.classList.remove('active');
             document.body.style.overflow = 'auto';
 
-            // Reset zoom and position
             currentZoom = 1;
             currentTranslate = { x: 0, y: 0 };
         }
@@ -964,7 +998,6 @@
             document.addEventListener('mousemove', drag);
             document.addEventListener('mouseup', endDrag);
 
-            // Touch events for mobile
             container.addEventListener('touchstart', startDragTouch);
             document.addEventListener('touchmove', dragTouch);
             document.addEventListener('touchend', endDrag);
@@ -1018,10 +1051,8 @@
                 return;
             }
 
-            // Clone SVG and inline styles
             const svgClone = svgElem.cloneNode(true);
 
-            // Inline computed styles for fonts and colors
             function inlineStyles(element) {
                 const computed = window.getComputedStyle(element);
                 element.setAttribute('font-family', computed.fontFamily);
@@ -1034,11 +1065,9 @@
             }
             inlineStyles(svgClone);
 
-            // Serialize SVG
             const serializer = new XMLSerializer();
             let svgString = serializer.serializeToString(svgClone);
 
-            // Fix for xmlns
             if (!svgString.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
                 svgString = svgString.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
             }
@@ -1046,7 +1075,6 @@
                 svgString = svgString.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
             }
 
-            // Create image
             const img = new window.Image();
             const svgData = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
 
@@ -1056,14 +1084,13 @@
                 canvas.height = img.height;
                 const ctx = canvas.getContext('2d');
 
-                // Optional: Fill background for JPEG
                 if (format === 'jpeg') {
                     ctx.fillStyle = '#fff';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                 }
 
                 ctx.drawImage(img, 0, 0);
-//working
+
                 const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
                 canvas.toBlob(function (blob) {
                     const url = URL.createObjectURL(blob);
@@ -1082,6 +1109,37 @@
             };
 
             img.src = svgData;
+        }
+
+        function enterFullscreenMode() {
+            const chatMessages = document.getElementById('chatMessages');
+            const mermaidContainers = chatMessages.querySelectorAll('.mermaid-container');
+
+            if (mermaidContainers.length === 0) {
+                alert('No diagrams found to display in fullscreen');
+                return;
+            }
+
+            const lastMermaidContainer = mermaidContainers[mermaidContainers.length - 1];
+            const mermaidElement = lastMermaidContainer.querySelector('.mermaid');
+
+            if (!mermaidElement) {
+                alert('No diagram found to display in fullscreen');
+                return;
+            }
+
+            const fullscreenModal = document.getElementById('fullscreenModal');
+            const fullscreenContainer = document.getElementById('fullscreenDiagramContainer');
+
+            const clonedDiagram = mermaidElement.cloneNode(true);
+            fullscreenContainer.innerHTML = '';
+            fullscreenContainer.appendChild(clonedDiagram);
+
+            fullscreenModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            resetZoom();
+            addDragFunctionality();
         }
 
         // Keyboard shortcuts for fullscreen
@@ -1125,15 +1183,12 @@
             isLoading = true;
             updateSendButton(true);
 
-            // Add user message to chat
             addMessage('user', message);
             messageInput.value = '';
             messageInput.style.height = 'auto';
 
-            // Show loading indicator
             const loadingId = addLoadingMessage();
 
-            // Send message to server
             fetch('{% url "diagram_app:send_message" %}', {
                 method: 'POST',
                 headers: {
@@ -1169,7 +1224,6 @@
         function addMessage(type, content, mermaidCode = null) {
             const chatMessages = document.getElementById('chatMessages');
 
-            // Remove welcome screen if it exists
             const welcomeScreen = chatMessages.querySelector('.welcome-screen');
             if (welcomeScreen) {
                 welcomeScreen.remove();
@@ -1189,13 +1243,29 @@
             if (mermaidCode) {
                 const mermaidContainer = document.createElement('div');
                 mermaidContainer.className = 'mermaid-container';
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'diagram-actions';
+                actionsDiv.innerHTML = `
+                    <button class="diagram-action-btn" onclick="openFullscreen(this)">
+                        <i class="fas fa-expand"></i> Fullscreen
+                    </button>
+                    <button class="diagram-action-btn" onclick="downloadDiagram(this, 'png')">
+                        <i class="fas fa-download"></i> PNG
+                    </button>
+                    <button class="diagram-action-btn" onclick="downloadDiagram(this, 'jpeg')">
+                        <i class="fas fa-download"></i> JPEG
+                    </button>
+                `;
+
                 const mermaidDiv = document.createElement('div');
                 mermaidDiv.className = 'mermaid';
                 mermaidDiv.textContent = mermaidCode;
+
+                mermaidContainer.appendChild(actionsDiv);
                 mermaidContainer.appendChild(mermaidDiv);
                 messageContent.appendChild(mermaidContainer);
 
-                // Re-render mermaid diagrams
                 mermaid.init(undefined, mermaidDiv);
             }
 
@@ -1203,7 +1273,6 @@
             messageDiv.appendChild(messageContent);
             chatMessages.appendChild(messageDiv);
 
-            // Scroll to bottom
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
@@ -1236,46 +1305,6 @@
 
             chatMessages.scrollTop = chatMessages.scrollHeight;
             return loadingId;
-        }
-
-
-        // Add this function to your existing JavaScript
-        function enterFullscreenMode() {
-            // Get the latest diagram from the chat
-            const chatMessages = document.getElementById('chatMessages');
-            const mermaidContainers = chatMessages.querySelectorAll('.mermaid-container');
-
-            if (mermaidContainers.length === 0) {
-                alert('No diagrams found to display in fullscreen');
-                return;
-            }
-
-            // Get the most recent diagram
-            const lastMermaidContainer = mermaidContainers[mermaidContainers.length - 1];
-            const mermaidElement = lastMermaidContainer.querySelector('.mermaid');
-
-            if (!mermaidElement) {
-                alert('No diagram found to display in fullscreen');
-                return;
-            }
-
-            const fullscreenModal = document.getElementById('fullscreenModal');
-            const fullscreenContainer = document.getElementById('fullscreenDiagramContainer');
-
-            // Clone the mermaid diagram
-            const clonedDiagram = mermaidElement.cloneNode(true);
-            fullscreenContainer.innerHTML = '';
-            fullscreenContainer.appendChild(clonedDiagram);
-
-            // Show fullscreen modal
-            fullscreenModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-
-            // Reset zoom and position
-            resetZoom();
-
-            // Add drag functionality
-            addDragFunctionality();
         }
 
         function removeLoadingMessage(loadingId) {

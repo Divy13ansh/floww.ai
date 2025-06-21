@@ -12,6 +12,15 @@ import uuid
 from .services import mermaid_generator
 from .models import ChatSession, ChatMessage, DiagramHistory
 
+
+def home_view(request):
+    """Landing page - accessible to all users"""
+    if request.user.is_authenticated:
+        # If user is already logged in, redirect to chat interface
+        return redirect('diagram_app:chat_interface')
+    return render(request, "diagram_app/home.html")
+
+
 # Authentication Views
 def signup_view(request):
     if request.method == 'POST':
@@ -58,7 +67,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect('diagram_app:home')  # Redirect to home instead of login
 
 # Chat Views with Authentication
 @login_required
