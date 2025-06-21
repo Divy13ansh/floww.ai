@@ -1,4 +1,1 @@
-1. add full screen mode
-2. add options to download the flowchart as .jpeg or any other format
-3. build a landing page using v0
-4. improve the UI using v0
+1. images when downloaded are not clear
