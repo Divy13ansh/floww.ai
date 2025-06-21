@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +9,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     {% block extra_css %}
-        
+
 
     <style>
-        
         * {
             margin: 0;
             padding: 0;
@@ -354,12 +354,25 @@
             animation: loadingDot 1.4s infinite ease-in-out;
         }
 
-        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .loading-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
 
         @keyframes loadingDot {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
         }
 
         /* Welcome Screen */
@@ -390,6 +403,206 @@
         .welcome-subtitle {
             font-size: 1rem;
             opacity: 0.8;
+        }
+
+        /* Add these styles after the existing CSS */
+
+        /* Fullscreen Modal */
+        .fullscreen-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .fullscreen-modal.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fullscreen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(20, 25, 35, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .fullscreen-title {
+            color: #4fc3f7;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .fullscreen-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .fullscreen-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(79, 195, 247, 0.2);
+            border-color: #4fc3f7;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+            margin-right: 1rem;
+        }
+
+        .zoom-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(79, 195, 247, 0.2);
+            border-color: #4fc3f7;
+        }
+
+        .zoom-level {
+            color: #fff;
+            font-size: 0.875rem;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .fullscreen-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .fullscreen-diagram-container {
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+            cursor: grab;
+            max-width: 100%;
+            max-height: 100%;
+            overflow: visible;
+        }
+
+        .fullscreen-diagram-container:active {
+            cursor: grabbing;
+        }
+
+        .fullscreen-diagram-container svg {
+            max-width: none !important;
+            max-height: none !important;
+        }
+
+        /* Close button */
+        .close-fullscreen {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            color: #ff6b6b;
+        }
+
+        .close-fullscreen:hover {
+            background: rgba(255, 68, 68, 0.3);
+            border-color: #ff6b6b;
+        }
+
+        /* Add this to your existing CSS */
+        .header-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+
+        .header-btn:hover {
+            background: rgba(79, 195, 247, 0.2);
+            border-color: #4fc3f7;
+            transform: translateY(-1px);
+        }
+
+        .header-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-controls {
+                display: none;
+                /* Hide on mobile to save space */
+            }
+        }
+
+        /* Mermaid diagram action buttons */
+        .diagram-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.25rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mermaid-container:hover .diagram-actions {
+            opacity: 1;
+        }
+
+        .diagram-action-btn {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: #fff;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .diagram-action-btn:hover {
+            background: rgba(79, 195, 247, 0.3);
+            border-color: #4fc3f7;
         }
 
         /* Responsive Design */
@@ -455,6 +668,7 @@
     </style>
     {% endblock %}
 </head>
+
 <body>
     {% block content %}
     <div class="app-container">
@@ -466,13 +680,13 @@
                     New chat
                 </a>
             </div>
-            
+
             <div class="sidebar-content">
                 <div class="sidebar-section">
                     <div class="section-title">Recent Chats</div>
                     {% for session in chat_sessions %}
-                    <div class="chat-item {% if session.session_id == current_session.session_id %}active{% endif %}" 
-                         onclick="navigateToSession('{{ session.session_id }}')">
+                    <div class="chat-item {% if session.session_id == current_session.session_id %}active{% endif %}"
+                        onclick="navigateToSession('{{ session.session_id }}')">
                         <div class="chat-item-icon">
                             <i class="fas fa-comment"></i>
                         </div>
@@ -509,6 +723,11 @@
                     <i class="fas fa-magic"></i>
                     floww.ai
                 </div>
+                <div class="header-controls">
+                    <button class="header-btn" onclick="enterFullscreenMode()" title="Enter Fullscreen Mode">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="chat-messages-area">
@@ -517,17 +736,28 @@
                     <div class="message {{ message.message_type }}">
                         <div class="message-avatar">
                             {% if message.message_type == 'user' %}
-                                <i class="fas fa-user"></i>
+                            <i class="fas fa-user"></i>
                             {% else %}
-                                <i class="fas fa-robot"></i>
+                            <i class="fas fa-robot"></i>
                             {% endif %}
                         </div>
                         <div class="message-content">
                             {{ message.content|linebreaks }}
                             {% if message.mermaid_code %}
-                                <div class="mermaid-container">
-                                    <div class="mermaid">{{ message.mermaid_code }}</div>
+                            <div class="mermaid-container">
+                                <div class="diagram-actions">
+                                    <button class="diagram-action-btn" onclick="openFullscreen(this)">
+                                        <i class="fas fa-expand"></i> Fullscreen
+                                    </button>
+                                    <button class="diagram-action-btn" onclick="downloadDiagram(this, 'png')">
+                                        <i class="fas fa-download"></i> PNG
+                                    </button>
+                                    <button class="diagram-action-btn" onclick="downloadDiagram(this, 'jpeg')">
+                                        <i class="fas fa-download"></i> JPEG
+                                    </button>
                                 </div>
+                                <div class="mermaid">{{ message.mermaid_code }}</div>
+                            </div>
                             {% endif %}
                         </div>
                     </div>
@@ -537,17 +767,57 @@
                             <i class="fas fa-magic"></i>
                         </div>
                         <h3 class="welcome-title">Welcome to AI Mermaid Assistant!</h3>
-                        <p class="welcome-subtitle">Start a conversation to create beautiful diagrams and flowcharts.</p>
+                        <p class="welcome-subtitle">Start a conversation to create beautiful diagrams and flowcharts.
+                        </p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
             <div class="chat-input-container">
-                <textarea id="messageInput" class="chat-input" placeholder="Describe your flowchart or diagram..." rows="1"></textarea>
+                <textarea id="messageInput" class="chat-input" placeholder="Describe your flowchart or diagram..."
+                    rows="1"></textarea>
                 <button class="send-button" id="sendButton" onclick="sendMessage()">
                     <i class="fas fa-paper-plane"></i>
                 </button>
+            </div>
+        </div>
+        <!-- Add this right before the closing </div> of app-container -->
+        <!-- Fullscreen Modal -->
+        <div class="fullscreen-modal" id="fullscreenModal">
+            <div class="fullscreen-header">
+                <div class="fullscreen-title">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                    Fullscreen Diagram View
+                </div>
+                <div class="fullscreen-controls">
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomDiagram(-0.1)">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <div class="zoom-level" id="zoomLevel">100%</div>
+                        <button class="zoom-btn" onclick="zoomDiagram(0.1)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="zoom-btn" onclick="resetZoom()">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                    <button class="fullscreen-btn" onclick="downloadFullscreenDiagram('png')">
+                        <i class="fas fa-download"></i> PNG
+                    </button>
+                    <button class="fullscreen-btn" onclick="downloadFullscreenDiagram('jpeg')">
+                        <i class="fas fa-download"></i> JPEG
+                    </button>
+                    <button class="fullscreen-btn close-fullscreen" onclick="closeFullscreen()">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+            <div class="fullscreen-content">
+                <div class="fullscreen-diagram-container" id="fullscreenDiagramContainer">
+                    <!-- Diagram will be inserted here -->
+                </div>
             </div>
         </div>
     </div>
@@ -555,8 +825,12 @@
 
     {% block extra_js %}
     <script>
+        let currentZoom = 1;
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let currentTranslate = { x: 0, y: 0 };
         // Initialize Mermaid
-        mermaid.initialize({ 
+        mermaid.initialize({
             startOnLoad: true,
             theme: 'dark',
             themeVariables: {
@@ -575,13 +849,13 @@
 
         // Auto-resize textarea
         const messageInput = document.getElementById('messageInput');
-        messageInput.addEventListener('input', function() {
+        messageInput.addEventListener('input', function () {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
 
         // Send message on Enter (but not Shift+Enter)
-        messageInput.addEventListener('keydown', function(e) {
+        messageInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
@@ -609,25 +883,239 @@
                         'Content-Type': 'application/json'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // If deleting current session, redirect to home
-                        if (sessionId === currentSessionId) {
-                            window.location.href = '{% url "diagram_app:chat_interface" %}';
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // If deleting current session, redirect to home
+                            if (sessionId === currentSessionId) {
+                                window.location.href = '{% url "diagram_app:chat_interface" %}';
+                            } else {
+                                location.reload();
+                            }
                         } else {
-                            location.reload();
+                            alert('Failed to delete session');
                         }
-                    } else {
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
                         alert('Failed to delete session');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to delete session');
-                });
+                    });
             }
         }
+
+        function openFullscreen(button) {
+            const mermaidContainer = button.closest('.mermaid-container');
+            const mermaidElement = mermaidContainer.querySelector('.mermaid');
+            const fullscreenModal = document.getElementById('fullscreenModal');
+            const fullscreenContainer = document.getElementById('fullscreenDiagramContainer');
+
+            // Clone the mermaid diagram
+            const clonedDiagram = mermaidElement.cloneNode(true);
+            fullscreenContainer.innerHTML = '';
+            fullscreenContainer.appendChild(clonedDiagram);
+
+            // Show fullscreen modal
+            fullscreenModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Reset zoom and position
+            resetZoom();
+
+            // Add drag functionality
+            addDragFunctionality();
+        }
+
+        function closeFullscreen() {
+            const fullscreenModal = document.getElementById('fullscreenModal');
+            fullscreenModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+
+            // Reset zoom and position
+            currentZoom = 1;
+            currentTranslate = { x: 0, y: 0 };
+        }
+
+        function zoomDiagram(delta) {
+            currentZoom = Math.max(0.1, Math.min(3, currentZoom + delta));
+            updateDiagramTransform();
+            updateZoomLevel();
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            currentTranslate = { x: 0, y: 0 };
+            updateDiagramTransform();
+            updateZoomLevel();
+        }
+
+        function updateDiagramTransform() {
+            const container = document.getElementById('fullscreenDiagramContainer');
+            container.style.transform = `translate(${currentTranslate.x}px, ${currentTranslate.y}px) scale(${currentZoom})`;
+        }
+
+        function updateZoomLevel() {
+            document.getElementById('zoomLevel').textContent = Math.round(currentZoom * 100) + '%';
+        }
+
+        function addDragFunctionality() {
+            const container = document.getElementById('fullscreenDiagramContainer');
+
+            container.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+
+            // Touch events for mobile
+            container.addEventListener('touchstart', startDragTouch);
+            document.addEventListener('touchmove', dragTouch);
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function startDrag(e) {
+            isDragging = true;
+            dragStart.x = e.clientX - currentTranslate.x;
+            dragStart.y = e.clientY - currentTranslate.y;
+        }
+
+        function startDragTouch(e) {
+            isDragging = true;
+            const touch = e.touches[0];
+            dragStart.x = touch.clientX - currentTranslate.x;
+            dragStart.y = touch.clientY - currentTranslate.y;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            currentTranslate.x = e.clientX - dragStart.x;
+            currentTranslate.y = e.clientY - dragStart.y;
+            updateDiagramTransform();
+        }
+
+        function dragTouch(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const touch = e.touches[0];
+            currentTranslate.x = touch.clientX - dragStart.x;
+            currentTranslate.y = touch.clientY - dragStart.y;
+            updateDiagramTransform();
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        function downloadFullscreenDiagram(format) {
+            const container = document.getElementById('fullscreenDiagramContainer');
+            if (!container) {
+                alert('No diagram found.');
+                return;
+            }
+            const svgElem = container.querySelector('svg');
+            if (!svgElem) {
+                alert('No SVG diagram found.');
+                return;
+            }
+
+            // Clone SVG and inline styles
+            const svgClone = svgElem.cloneNode(true);
+
+            // Inline computed styles for fonts and colors
+            function inlineStyles(element) {
+                const computed = window.getComputedStyle(element);
+                element.setAttribute('font-family', computed.fontFamily);
+                element.setAttribute('font-size', computed.fontSize);
+                element.setAttribute('fill', computed.fill);
+                element.setAttribute('stroke', computed.stroke);
+                for (let child of element.children) {
+                    inlineStyles(child);
+                }
+            }
+            inlineStyles(svgClone);
+
+            // Serialize SVG
+            const serializer = new XMLSerializer();
+            let svgString = serializer.serializeToString(svgClone);
+
+            // Fix for xmlns
+            if (!svgString.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                svgString = svgString.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+            if (!svgString.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
+                svgString = svgString.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+            }
+
+            // Create image
+            const img = new window.Image();
+            const svgData = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+
+            img.onload = function () {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+
+                // Optional: Fill background for JPEG
+                if (format === 'jpeg') {
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
+                ctx.drawImage(img, 0, 0);
+
+                const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+                canvas.toBlob(function (blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'diagram.' + format;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, mimeType);
+            };
+
+            img.onerror = function () {
+                alert('Failed to export diagram.');
+            };
+
+            img.src = svgData;
+        }
+
+        // Keyboard shortcuts for fullscreen
+        document.addEventListener('keydown', function (e) {
+            if (document.getElementById('fullscreenModal').classList.contains('active')) {
+                switch (e.key) {
+                    case 'Escape':
+                        closeFullscreen();
+                        break;
+                    case '=':
+                    case '+':
+                        e.preventDefault();
+                        zoomDiagram(0.1);
+                        break;
+                    case '-':
+                        e.preventDefault();
+                        zoomDiagram(-0.1);
+                        break;
+                    case '0':
+                        e.preventDefault();
+                        resetZoom();
+                        break;
+                }
+            }
+        });
+
+        // Mouse wheel zoom
+        document.getElementById('fullscreenDiagramContainer').addEventListener('wheel', function (e) {
+            if (document.getElementById('fullscreenModal').classList.contains('active')) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                zoomDiagram(delta);
+            }
+        });
 
         // Chat functions
         function sendMessage() {
@@ -657,30 +1145,30 @@
                     session_id: currentSessionId
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                removeLoadingMessage(loadingId);
-                
-                if (data.success) {
-                    addMessage('assistant', data.response, data.mermaid_code);
-                } else {
-                    addErrorMessage(data.error || 'Failed to send message');
-                }
-            })
-            .catch(error => {
-                removeLoadingMessage(loadingId);
-                addErrorMessage('Network error. Please try again.');
-                console.error('Error:', error);
-            })
-            .finally(() => {
-                isLoading = false;
-                updateSendButton(false);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    removeLoadingMessage(loadingId);
+
+                    if (data.success) {
+                        addMessage('assistant', data.response, data.mermaid_code);
+                    } else {
+                        addErrorMessage(data.error || 'Failed to send message');
+                    }
+                })
+                .catch(error => {
+                    removeLoadingMessage(loadingId);
+                    addErrorMessage('Network error. Please try again.');
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    isLoading = false;
+                    updateSendButton(false);
+                });
         }
 
         function addMessage(type, content, mermaidCode = null) {
             const chatMessages = document.getElementById('chatMessages');
-            
+
             // Remove welcome screen if it exists
             const welcomeScreen = chatMessages.querySelector('.welcome-screen');
             if (welcomeScreen) {
@@ -689,15 +1177,15 @@
 
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}`;
-            
+
             const avatar = document.createElement('div');
             avatar.className = 'message-avatar';
             avatar.innerHTML = type === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
-            
+
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
             messageContent.innerHTML = content.replace(/\n/g, '<br>');
-            
+
             if (mermaidCode) {
                 const mermaidContainer = document.createElement('div');
                 mermaidContainer.className = 'mermaid-container';
@@ -706,15 +1194,15 @@
                 mermaidDiv.textContent = mermaidCode;
                 mermaidContainer.appendChild(mermaidDiv);
                 messageContent.appendChild(mermaidContainer);
-                
+
                 // Re-render mermaid diagrams
                 mermaid.init(undefined, mermaidDiv);
             }
-            
+
             messageDiv.appendChild(avatar);
             messageDiv.appendChild(messageContent);
             chatMessages.appendChild(messageDiv);
-            
+
             // Scroll to bottom
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
@@ -722,15 +1210,15 @@
         function addLoadingMessage() {
             const chatMessages = document.getElementById('chatMessages');
             const loadingId = 'loading-' + Date.now();
-            
+
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message assistant';
             messageDiv.id = loadingId;
-            
+
             const avatar = document.createElement('div');
             avatar.className = 'message-avatar';
             avatar.innerHTML = '<i class="fas fa-robot"></i>';
-            
+
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content loading';
             messageContent.innerHTML = `
@@ -741,13 +1229,53 @@
                     <div class="loading-dot"></div>
                 </div>
             `;
-            
+
             messageDiv.appendChild(avatar);
             messageDiv.appendChild(messageContent);
             chatMessages.appendChild(messageDiv);
-            
+
             chatMessages.scrollTop = chatMessages.scrollHeight;
             return loadingId;
+        }
+
+
+        // Add this function to your existing JavaScript
+        function enterFullscreenMode() {
+            // Get the latest diagram from the chat
+            const chatMessages = document.getElementById('chatMessages');
+            const mermaidContainers = chatMessages.querySelectorAll('.mermaid-container');
+
+            if (mermaidContainers.length === 0) {
+                alert('No diagrams found to display in fullscreen');
+                return;
+            }
+
+            // Get the most recent diagram
+            const lastMermaidContainer = mermaidContainers[mermaidContainers.length - 1];
+            const mermaidElement = lastMermaidContainer.querySelector('.mermaid');
+
+            if (!mermaidElement) {
+                alert('No diagram found to display in fullscreen');
+                return;
+            }
+
+            const fullscreenModal = document.getElementById('fullscreenModal');
+            const fullscreenContainer = document.getElementById('fullscreenDiagramContainer');
+
+            // Clone the mermaid diagram
+            const clonedDiagram = mermaidElement.cloneNode(true);
+            fullscreenContainer.innerHTML = '';
+            fullscreenContainer.appendChild(clonedDiagram);
+
+            // Show fullscreen modal
+            fullscreenModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Reset zoom and position
+            resetZoom();
+
+            // Add drag functionality
+            addDragFunctionality();
         }
 
         function removeLoadingMessage(loadingId) {
@@ -788,23 +1316,24 @@
         }
 
         // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const sidebar = document.getElementById('sidebar');
             const sidebarToggle = document.querySelector('.sidebar-toggle');
-            
-            if (window.innerWidth <= 768 && 
-                sidebar.classList.contains('open') && 
-                !sidebar.contains(event.target) && 
+
+            if (window.innerWidth <= 768 &&
+                sidebar.classList.contains('open') &&
+                !sidebar.contains(event.target) &&
                 !sidebarToggle.contains(event.target)) {
                 sidebar.classList.remove('open');
             }
         });
 
         // Initialize mermaid diagrams on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             mermaid.init();
         });
     </script>
     {% endblock %}
 </body>
+
 </html>
