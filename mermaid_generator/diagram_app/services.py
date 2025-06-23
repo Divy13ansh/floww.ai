@@ -1,10 +1,16 @@
 import chromadb
+import os
 from django.conf import settings
 import requests
 import json
 from .models import ChatMessage, ChatSession
 from sentence_transformers import SentenceTransformer
 import logging
+
+
+os.environ["HF_HOME"] = "/data/huggingface"
+os.environ["TRANSFORMERS_CACHE"] = "/data/huggingface/models"
+
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -13,7 +19,9 @@ logger = logging.getLogger(__name__)
 class ContextAwareMermaidGenerator:
     def __init__(self):
         # Initialize Chroma client
-        self.chroma_client = chromadb.Client()
+        chroma_path = os.getenv("CHROMA_DB_PATH", "/data/chroma")
+        self.chroma_client = chromadb.PersistentClient(path=chroma_path)
+
         self.collection = self.chroma_client.get_or_create_collection(name="mermaid_prompts")
         
         # Initialize sentence transformer for embeddings
